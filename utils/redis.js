@@ -6,11 +6,11 @@ class RedisClient {
     this.client = createClient();
     this.live = true;
 
-    this.client.on("error", () => {
-      console.error("Error fail");
+    this.client.on('error', () => {
+      console.error('Error fail');
       this.live = false;
     });
-    this.client.on("connect", () => {
+    this.client.on('connect', () => {
       this.live = true;
     });
   }
@@ -24,11 +24,11 @@ class RedisClient {
   }
 
   async set(key, val, duration) {
-    await promisify(this.client.SETEX).bind(this.client)(key, duration, val);
+    await this.client.SETEX(key, duration, val);
   }
 
   async del(key) {
-    await promisify(this.client.DEL).bind(this.client)(key);
+    await this.client.DEL(key);
   }
 }
 
