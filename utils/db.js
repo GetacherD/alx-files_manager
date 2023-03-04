@@ -9,6 +9,7 @@ class DBClient {
 
     this.client = new MongoClient(dbURL, { useUnifiedTopology: true });
     this.client.connect();
+    // console.log(this.client.db(), "the database")
   }
 
   isAlive() {
@@ -32,5 +33,5 @@ class DBClient {
   }
 }
 
-export const dbClient = new DBClient();
+const dbClient = new DBClient();
 export default dbClient;
