@@ -8,11 +8,11 @@ export default class AuthController {
   static async getConnect(req, res) {
     const auth = req.headers.authorization;
 
-    // const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
-    // const text = buff.toString('utf-8');
+    const buff = new Buffer(auth.slice(5, auth.length - 1), 'base64');
+    const text = buff.toString('utf-8');
     // console.log(typeof auth)
-    const val = auth.slice(5, auth.length - 1);
-    const text = decodeURIComponent(atob(val));
+    //     const val = auth.slice(5, auth.length - 1);
+    //     const text = decodeURIComponent(atob(val));
     // res.status(200).json({ "text": text })
     // return
     const email = text.split(':')[0];
