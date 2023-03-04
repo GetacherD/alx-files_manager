@@ -1,8 +1,6 @@
 import sha1 from 'sha1';
 import dbClient from '../utils/db';
-// import Queue from 'bull/lib/queue';
-
-// const userQueue = new Queue('email sending');
+import redisClient from '../utils/redis';
 
 export default class UsersController {
   static async postNew(req, res) {
@@ -26,13 +24,20 @@ export default class UsersController {
       .insertOne({ email, password: sha1(password) });
     const userId = insertionInfo.insertedId.toString();
 
-    // userQueue.add({ userId });
     res.status(201).json({ email, id: userId });
   }
 
-  // static async getMe(req, res) {
-  //   const { user } = req;
+  static async getMe(req, res) {
+    const token = req.headers['x-token'];
+    try {
+      const email = await redisClient.get(`auth_${token}`);
 
-  //   res.status(200).json({ email: user.email, id: user._id.toString() });
-  // }
+      const id = await (await dbClient.usersCollection()).findOne({ email });
+
+      res.status(200).json({ email, id: id._id });
+      return;
+    } catch (e) {
+      res.status(401).json({ error: 'Unauthorized' });
+    }
+  }
 }
