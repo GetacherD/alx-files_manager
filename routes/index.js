@@ -5,9 +5,9 @@ const express = require('express');
 
 const router = express.Router();
 
-router.get('/stats', (req, res) => AppController.getStats(req, res));
+router.get('/stats', AppController.getStats);
 
-router.get('/status', (req, res) => AppController.getStatus(req, res));
+router.get('/status', AppController.getStatus);
 
 // router.get('/connect', AppController.getConnect);
 
