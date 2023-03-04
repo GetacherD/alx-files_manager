@@ -24,11 +24,11 @@ class RedisClient {
   }
 
   async set(key, val, duration) {
-    await promisify(this.client.SETEX).bind(this.client)(key, duration, val);
+    await this.client.SETEX(key, duration, val);
   }
 
   async del(key) {
-    await promisify(this.client.DEL).bind(this.client)(key);
+    await this.client.DEL(key);
   }
 }
 
