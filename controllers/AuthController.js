@@ -10,17 +10,15 @@ export default class AuthController {
 
     const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
     const text = buff.toString('utf-8');
-    // console.log(typeof auth)
-    //     const val = auth.slice(5, auth.length - 1);
-    //     const text = decodeURIComponent(atob(val));
-    // res.status(200).json({ "text": text })
-    // return
     const email = text.split(':')[0];
     const password = text.split(':')[1];
     try {
       const user = await (await dbClient.usersCollection())
         .findOne({ email, password: sha1(password) });
-
+      if (!user) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
       const token = v4();
       const key = `auth_${token}`;
       await redisClient.set(key, user._id, 24 * 60 * 60);
@@ -35,7 +33,6 @@ export default class AuthController {
     const token = req.header('X-Token');
     try {
       const key = await redisClient.get(`auth_${token}`);
-      console.log(key);
       if (!key) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
