@@ -39,7 +39,7 @@ export default class UsersController {
 
       const obj = await (await dbClient.usersCollection()).findOne({ _id: ObjectId(idd) });
 
-      res.status(200).json({ email: obj.email, id: obj._id });
+      res.status(200).json({ email: obj.email, id: obj._id.toString() });
       return;
     } catch (e) {
       res.status(401).json({ error: 'Unauthorized' });
