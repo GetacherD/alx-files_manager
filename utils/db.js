@@ -1,8 +1,8 @@
 import { MongoClient } from 'mongodb';
 
-import { config } from 'dotenv';
+// import { config } from 'dotenv';
 
-config();
+// config();
 
 class DBClient {
   constructor() {
