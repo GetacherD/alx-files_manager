@@ -1,8 +1,8 @@
-import mongodb from 'mongodb';
+import { MongoClient } from 'mongodb';
 
 import { config } from 'dotenv';
-config();
 
+config();
 
 class DBClient {
   constructor() {
@@ -11,12 +11,17 @@ class DBClient {
     const database = process.env.DB_DATABASE || 'files_manager';
     const dbURL = `mongodb://${host}:${port}/${database}`;
 
-    this.client = new mongodb.MongoClient(dbURL, { useUnifiedTopology: true });
+    this.client = new MongoClient(dbURL, { useUnifiedTopology: true });
     this.client.connect();
   }
 
   isAlive() {
-    return this.client.isConnected();
+    if (this.client.db() !== null) {
+      this.client.db().collection('users').insertOne({ name: 'Getacher' });
+      this.client.db().collection('files').insertOne({ age: 50 });
+      return true;
+    }
+    return false;
   }
 
   async nbUsers() {

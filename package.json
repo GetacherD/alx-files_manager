@@ -22,7 +22,8 @@
                 "mime-types": "^2.1.27",
                 "redis": "^2.8.0",
                 "sha1": "^1.1.1",
-                "uuid": "^8.2.0"
+                "uuid": "^8.2.0",
+                "mongodb": "^5.1.0"
         },
         "devDependencies": {
                 "@babel/cli": "^7.8.0",
@@ -37,7 +38,6 @@
                 "eslint-plugin-import": "^2.18.2",
                 "eslint-plugin-jest": "^22.17.0",
                 "mocha": "^6.2.2",
-                "mongodb": "^5.1.0",
                 "nodemon": "^2.0.2",
                 "request": "^2.88.0",
                 "sinon": "^7.5.0"
