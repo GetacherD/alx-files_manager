@@ -16,12 +16,7 @@ class DBClient {
   }
 
   isAlive() {
-    if (this.client.db() !== null) {
-      this.client.db().collection('users').insertOne({ name: 'Getacher' });
-      this.client.db().collection('files').insertOne({ age: 50 });
-      return true;
-    }
-    return false;
+    return this.client.isConnected();
   }
 
   async nbUsers() {
