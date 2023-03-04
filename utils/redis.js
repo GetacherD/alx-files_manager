@@ -6,13 +6,14 @@ class RedisClient {
     this.client = createClient();
     this.live = true;
 
-    this.client.on("error", (err) => {
-      console.error("Error fail");
+    this.client.on('error', () => {
+      console.error('Error fail');
       this.live = false;
     });
-    this.client.on("connect", () => {
+    this.client.on('connect', () => {
       this.live = true;
     });
+    this.client.connect();
   }
 
   isAlive() {
