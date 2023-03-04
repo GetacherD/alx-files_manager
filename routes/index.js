@@ -1,20 +1,20 @@
 import AppController from '../controllers/AppController';
-import UsersController from '../controllers/UsersController';
+// import UsersController from '../controllers/UsersController';
 
 const express = require('express');
 
 const router = express.Router();
 
-router.get('/stats', AppController.getStats);
+router.get('/stats', (req, res) => AppController.getStats(req, res));
 
-router.get('/status', AppController.getStatus);
+router.get('/status', (req, res) => AppController.getStatus(req, res));
 
-router.get('/connect', AppController.getConnect);
+// router.get('/connect', AppController.getConnect);
 
-router.get('/disconnect', AppController.getDisconnect);
+// router.get('/disconnect', AppController.getDisconnect);
 
-router.get('/users/me', UsersController.getMe);
+// router.get('/users/me', UsersController.getMe);
 
-router.post('/users', UsersController.postNew);
+// router.post('/users', UsersController.postNew);
 
 module.exports = router;
