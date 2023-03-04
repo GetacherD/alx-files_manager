@@ -1,9 +1,5 @@
 import { MongoClient } from 'mongodb';
 
-// import { config } from 'dotenv';
-
-// config();
-
 class DBClient {
   constructor() {
     const host = process.env.DB_HOST || 'localhost';
