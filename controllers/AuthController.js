@@ -18,12 +18,12 @@ export default class AuthController {
     const email = text.split(':')[0];
     const password = text.split(':')[1];
     try {
-      await (await dbClient.usersCollection())
+      const user = await (await dbClient.usersCollection())
         .findOne({ email, password: sha1(password) });
 
       const token = v4();
       const key = `auth_${token}`;
-      await redisClient.set(key, email, 24 * 60 * 60);
+      await redisClient.set(key, user._id, 24 * 60 * 60);
       res.status(200).json({ token });
       return;
     } catch (e) {
@@ -32,8 +32,14 @@ export default class AuthController {
   }
 
   static async getDisconnect(req, res) {
-    const token = req.headers['x-token'];
+    const token = req.header('X-Token');
     try {
+      const key = await redisClient.get(`auth_${token}`);
+      console.log(key);
+      if (!key) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
       await redisClient.del(`auth_${token}`);
       res.status(204).send();
       return;
