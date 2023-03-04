@@ -19,10 +19,10 @@
                 "express": "^4.17.1",
                 "image-thumbnail": "^1.0.10",
                 "mime-types": "^2.1.27",
-                "mongodb": "^5.1.0",
                 "redis": "^2.8.0",
                 "sha1": "^1.1.1",
-                "uuid": "^8.2.0"
+                "uuid": "^8.2.0",
+                "mongodb": "^3.5.9"
         },
         "devDependencies": {
                 "@babel/cli": "^7.8.0",
