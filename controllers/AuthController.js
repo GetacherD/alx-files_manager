@@ -1,14 +1,14 @@
 import sha1 from 'sha1';
 import { v4 } from 'uuid';
-import { atob } from 'atob';
+
 import dbClient from '../utils/db';
 import redisClient from '../utils/redis';
 
 export default class AuthController {
   static async getConnect(req, res) {
-    const auth = req.headers.authorization;
+    const auth = req.header('Authorization');
 
-    const buff = new Buffer(auth.slice(5, auth.length - 1), 'base64');
+    const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
     const text = buff.toString('utf-8');
     // console.log(typeof auth)
     //     const val = auth.slice(5, auth.length - 1);
