@@ -8,11 +8,10 @@ import dbClient from '../utils/db';
 export default class FilesController {
   static async postUpload(req, res) {
     const token = req.header('X-Token');
-    const UserID = await redisClient.get(`auth_${token}`);
-
+    let UserID = null;
     try {
-      // const UserID = await redisClient.get(`auth_${token}`);
-      // console.log("The UserID is", UserID);
+      UserID = await redisClient.get(`auth_${token}`);
+
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
