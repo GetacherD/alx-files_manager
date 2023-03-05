@@ -42,7 +42,7 @@ export default class UsersController {
       res.status(200).json({ email: obj.email, id: obj._id.toString() });
       return;
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server Error' });
     }
   }
 }

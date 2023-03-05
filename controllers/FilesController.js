@@ -16,7 +16,7 @@ export default class FilesController {
         return;
       }
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server Error' });
       return;
     }
 
@@ -73,7 +73,7 @@ export default class FilesController {
         });
         return;
       } catch (e) {
-        res.status(401).json({ error: 'Unauthorized' });
+        res.status(500).json({ error: 'Server Error' });
         return;
       }
     }
@@ -83,38 +83,43 @@ export default class FilesController {
     if (!folderExists) {
       const createdDir = await fs.promises.mkdir(uploadFolder);
       if (!createdDir) {
-        res.status(401).json({ error: 'Unauthorized' });
+        res.status(500).json({ error: 'Server Error' });
         return;
       }
     }
-    // either already exist or success created
-    const fileNameLocal = uuid4();
-    let clearData = null;
-    if (type_ === 'image') {
-      clearData = data_;
-    } else {
-      clearData = Buffer.from(data_, 'base64').toString('utf-8');
-    }
-    await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
-    // file is placed in HDD
-    // DB reference to the file
-    const addedToDb = await (await dbClient.filesCollection()).insertOne({
-      userId: UserID,
-      name: name_,
-      type: type_,
-      isPublic: isPublic_,
-      parentId: parentId_,
-      localPath: `${uploadFolder}/${fileNameLocal}`,
-    });
 
-    res.status(201).json({
-      id: addedToDb.insertedId,
-      userId: UserID,
-      name: name_,
-      type: type_,
-      isPublic: isPublic_,
-      parentId: parentId_,
-      localPath: `${uploadFolder}/${fileNameLocal}`,
-    });
+    try {
+      // either already exist or success created
+      const fileNameLocal = uuid4();
+      let clearData = null;
+      if (type_ === 'image') {
+        clearData = data_;
+      } else {
+        clearData = Buffer.from(data_, 'base64').toString('utf-8');
+      }
+      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
+      // file is placed in HDD
+      // DB reference to the file
+      const addedToDb = await (await dbClient.filesCollection()).insertOne({
+        userId: UserID,
+        name: name_,
+        type: type_,
+        isPublic: isPublic_,
+        parentId: parentId_,
+        localPath: `${uploadFolder}/${fileNameLocal}`,
+      });
+
+      res.status(201).json({
+        id: addedToDb.insertedId,
+        userId: UserID,
+        name: name_,
+        type: type_,
+        isPublic: isPublic_,
+        parentId: parentId_,
+        localPath: `${uploadFolder}/${fileNameLocal}`,
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'Server Error' });
+    }
   }
 }

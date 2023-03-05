@@ -6,7 +6,7 @@ import redisClient from '../utils/redis';
 
 export default class AuthController {
   static async getConnect(req, res) {
-    console.log(req);
+    //     console.log(req);
     const auth = req.header('Authorization');
 
     const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
@@ -26,7 +26,7 @@ export default class AuthController {
       res.status(200).json({ token });
       return;
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server Error' });
     }
   }
 
@@ -42,7 +42,7 @@ export default class AuthController {
       res.status(204).end();
       return;
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server Error' });
     }
   }
 }
