@@ -10,19 +10,16 @@ export default class FilesController {
     const token = req.header('X-Token');
     let UserID = null;
     try {
-      UserID = await redisClient.get(`auth_${token}`);
-
+      UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
     } catch (e) {
-      res.status(500).end();
+      res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    // const user = await (await dbClient.usersCollection()).findOne({ _id: ObjectId(UserID) });
 
-    // console.log("the real user is", user)
     const name_ = (req.body && req.body.name) ? req.body.name : null;
     const type_ = (req.body && req.body.type) ? req.body.type : null;
     const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : 0;
@@ -44,21 +41,21 @@ export default class FilesController {
       res.status(400).json({ error: 'Missing data' });
       return;
     }
-
-    if (parentId_) {
-      const filePid = await (await dbClient.filesCollection())
+    // parent_ID -> folder id for file    root /  default 0
+    if (parentId_) { // if parent ID !=0  some folder id
+      const folderId = await (await dbClient.filesCollection()) // folder object
         .findOne({ _id: ObjectId(parentId_) });
 
-      if (!filePid) {
+      if (!folderId) {
         res.status(400).json({ error: 'Parent not found' });
         return;
       }
-      if (filePid.type !== 'folder') {
+      if (folderId.type !== 'folder') {
         res.status(400).json({ error: 'Parent is not a folder' });
         return;
       }
     }
-
+    // ready to be saved in specified folder
     if (type_ === 'folder') {
       try {
         const NewFolder = {
@@ -76,24 +73,31 @@ export default class FilesController {
         });
         return;
       } catch (e) {
-        res.status(500).end();
+        res.status(401).json({ error: 'Unauthorized' });
         return;
       }
     }
+    // only if type is not folder
     const uploadFolder = process.env.FOLDER_PATH || '/tmp/files_manager';
     const folderExists = existsSync(uploadFolder);
     if (!folderExists) {
       const createdDir = await fs.promises.mkdir(uploadFolder);
       if (!createdDir) {
-        res.status(500).end();
+        res.status(401).json({ error: 'Unauthorized' });
         return;
       }
-      console.log('folder created', uploadFolder);
     }
+    // either already exist or success created
     const fileNameLocal = uuid4();
-    const clearData = Buffer.from(data_, 'base64').toString('utf-8');
+    let clearData = null;
+    if (type_ === 'image') {
+      clearData = data_;
+    } else {
+      clearData = Buffer.from(data_, 'base64').toString('utf-8');
+    }
     await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
-
+    // file is placed in HDD
+    // DB reference to the file
     const addedToDb = await (await dbClient.filesCollection()).insertOne({
       userId: UserID,
       name: name_,
