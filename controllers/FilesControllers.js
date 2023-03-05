@@ -8,20 +8,16 @@ import dbClient from '../utils/db';
 export default class FilesController {
   static async postUpload(req, res) {
     const token = req.header('X-Token');
-    console.log('The Token is', token);
     const UserID = await redisClient.get(`auth_${token}`);
-    console.log('The UserID is', UserID);
 
     try {
       // const UserID = await redisClient.get(`auth_${token}`);
       // console.log("The UserID is", UserID);
       if (!UserID) {
-        console.log('not in cache');
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
     } catch (e) {
-      console.log('some other error');
       res.status(500).end();
       return;
     }
@@ -33,10 +29,6 @@ export default class FilesController {
     const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : 0;
     const isPublic_ = (req.body && req.body.isPublic) ? req.body.isPublic : false;
     let data_ = null; // Base64 file format
-
-    console.log({
-      name: name_, type: type_, parentId: parentId_, isPublic: isPublic_,
-    });
     if (type_ === 'file' || type_ === 'image') {
       data_ = req.body ? req.body.data : null;
     }
@@ -55,10 +47,9 @@ export default class FilesController {
     }
 
     if (parentId_) {
-      console.log(parentId_, 'the undefined');
       const filePid = await (await dbClient.filesCollection())
         .findOne({ _id: ObjectId(parentId_) });
-      console.log('file paren pid>', filePid);
+
       if (!filePid) {
         res.status(400).json({ error: 'Parent not found' });
         return;
@@ -102,12 +93,8 @@ export default class FilesController {
     }
     const fileNameLocal = uuid4();
     const clearData = Buffer.from(data_, 'base64').toString('utf-8');
-    const written = await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
-    console.log('writtn success', written);
-    if (!written) {
-      console.log('not qritten?');
-      // res.status(500).end();
-    }
+    await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
+
     const addedToDb = await (await dbClient.filesCollection()).insertOne({
       userId: UserID,
       name: name_,
@@ -116,7 +103,7 @@ export default class FilesController {
       parentId: parentId_,
       localPath: `${uploadFolder}/${fileNameLocal}`,
     });
-    console.log('added file to db');
+
     res.status(201).json({
       id: addedToDb.insertedId,
       userId: UserID,
