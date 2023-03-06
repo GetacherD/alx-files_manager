@@ -29,8 +29,9 @@ export default class FilesController {
     }
     await (await dbClient.filesCollection())
       .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: false } });
-    const data = await fs.promises.readFile(file.localPath, 'utf-8');
-    res.status(200).send(data);
+    // const data = await fs.promises.readFile(file.localPath, 'utf-8');
+    file.isPublic = false;
+    res.status(200).send(file);
   }
 
   static async putPublish(req, res) {
@@ -55,8 +56,9 @@ export default class FilesController {
     }
     await (await dbClient.filesCollection())
       .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: true } });
-    const data = await fs.promises.readFile(file.localPath, 'utf-8');
-    res.status(200).send(data);
+    // const data = await fs.promises.readFile(file.localPath, 'utf-8');
+    file.isPublic = true;
+    res.status(200).send(file);
   }
 
   static async getIndex(req, res) {
