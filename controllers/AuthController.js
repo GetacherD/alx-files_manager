@@ -8,7 +8,10 @@ export default class AuthController {
   static async getConnect(req, res) {
     //     console.log(req);
     const auth = req.header('Authorization');
-
+    if (auth.slice(0, 5).toLowerCase() !== 'Basic'.toLowerCase()) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
     const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
     const text = buff.toString('utf-8');
     const email = text.split(':')[0];
