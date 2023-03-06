@@ -5,18 +5,18 @@ import redisClient from '../utils/redis';
 
 export default class UsersController {
   static async postNew(req, res) {
-    const email = (req.body && req.body.email) ? req.body.email : null;
-    const password = (req.body && req.body.password) ? req.body.password : null;
-
-    if (!email) {
-      res.status(400).json({ error: 'Missing email' });
-      return;
-    }
-    if (!password) {
-      res.status(400).json({ error: 'Missing password' });
-      return;
-    }
     try {
+      const email = (req.body && req.body.email) ? req.body.email : null;
+      const password = (req.body && req.body.password) ? req.body.password : null;
+
+      if (!email) {
+        res.status(400).json({ error: 'Missing email' });
+        return;
+      }
+      if (!password) {
+        res.status(400).json({ error: 'Missing password' });
+        return;
+      }
       const user = await (await dbClient.usersCollection()).findOne({ email });
       if (user) {
         res.status(400).json({ error: 'Already exist' });
@@ -36,8 +36,8 @@ export default class UsersController {
   }
 
   static async getMe(req, res) {
-    const token = req.header('X-Token');
     try {
+      const token = req.header('X-Token');
       const idd = await redisClient.get(`auth_${token}`);
       if (!idd) {
         res.status(401).json({ error: 'Unauthorized' });

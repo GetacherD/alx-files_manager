@@ -6,22 +6,22 @@ import redisClient from '../utils/redis';
 
 export default class AuthController {
   static async getConnect(req, res) {
-    //     console.log(req);
-    const auth = req.header('Authorization');
-    if (!auth) {
-      res.status(400).json({ error: 'No authorization header' });
-      return;
-    }
-    console.log(auth.slice(0, 7));
-    if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-    const buff = Buffer.from(auth.slice(6), 'base64');
-    const text = buff.toString('utf-8');
-    const email = text.split(':')[0];
-    const password = text.split(':')[1];
     try {
+      //     console.log(req);
+      const auth = req.header('Authorization');
+      if (!auth) {
+        res.status(400).json({ error: 'No authorization header' });
+        return;
+      }
+      console.log(auth.slice(0, 7));
+      if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      const buff = Buffer.from(auth.slice(6), 'base64');
+      const text = buff.toString('utf-8');
+      const email = text.split(':')[0];
+      const password = text.split(':')[1];
       const user = await (await dbClient.usersCollection())
         .findOne({ email });
       if (!user) {
@@ -43,13 +43,13 @@ export default class AuthController {
   }
 
   static async getDisconnect(req, res) {
-    const token = req.header('X-Token');
     try {
       // const key = await redisClient.get(`auth_${token}`);
       // if (!key) {
       //   res.status(401).json({ error: 'Unauthorized' });
       //   return;
       // }
+      const token = req.header('X-Token');
       await redisClient.del(`auth_${token}`);
       res.status(204).send('');
       return;
