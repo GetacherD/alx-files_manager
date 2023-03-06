@@ -30,6 +30,7 @@ export default class AuthController {
       return;
     } catch (e) {
       res.status(500).json({ error: 'Server Error' });
+      return
     }
   }
 
@@ -46,6 +47,7 @@ export default class AuthController {
       return;
     } catch (e) {
       res.status(500).json({ error: 'Server Error' });
+      return
     }
   }
 }
