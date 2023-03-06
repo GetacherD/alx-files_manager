@@ -82,7 +82,7 @@ export default class FilesController {
     const page = Number(req.query.page) ? Number(req.query.page) : 0;
     // console.log("page:", page)
     const files = await (await (await dbClient.filesCollection())
-      .find({ parentId }).skip(page * 20).limit(20)).toArray();
+      .find({ parentId, userId: UserID }).skip(page * 20).limit(20)).toArray();
     res.status(200).send(files);
   }
 
