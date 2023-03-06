@@ -7,6 +7,58 @@ import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 export default class FilesController {
+  static async putUnpublish(req, res) {
+    const token = req.header('X-Token');
+    let UserID = null;
+    try {
+      UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      if (!UserID) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+      return;
+    }
+    const { id } = req.params;
+    const file = await (await dbClient.filesCollection())
+      .findOne({ _id: ObjectId(id), userId: UserID });
+    if (!file) {
+      res.status(404).json({ error: 'Not found' });
+      return;
+    }
+    await (await dbClient.filesCollection())
+      .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: false } });
+    const data = await fs.promises.readFile(file.localPath, 'utf-8');
+    res.status(200).send(data);
+  }
+
+  static async putPublish(req, res) {
+    const token = req.header('X-Token');
+    let UserID = null;
+    try {
+      UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      if (!UserID) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
+      return;
+    }
+    const { id } = req.params;
+    const file = await (await dbClient.filesCollection())
+      .findOne({ _id: ObjectId(id), userId: UserID });
+    if (!file) {
+      res.status(404).json({ error: 'Not found' });
+      return;
+    }
+    await (await dbClient.filesCollection())
+      .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: true } });
+    const data = await fs.promises.readFile(file.localPath, 'utf-8');
+    res.status(200).send(data);
+  }
+
   static async getIndex(req, res) {
     const token = req.header('X-Token');
     let UserID = null;
@@ -17,7 +69,7 @@ export default class FilesController {
         return;
       }
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server error' });
       return;
     }
     // console.log(req)
