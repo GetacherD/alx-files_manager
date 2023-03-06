@@ -20,7 +20,7 @@ export default class FilesController {
       res.status(500).json({ error: 'Server error' });
       return;
     }
-    const { id } = req.params;
+    const { id } = req.params.id;
     const file = await (await dbClient.filesCollection())
       .findOne({ _id: ObjectId(id), userId: UserID });
     if (!file) {
@@ -46,7 +46,7 @@ export default class FilesController {
       res.status(500).json({ error: 'Server error' });
       return;
     }
-    const { id } = req.params;
+    const { id } = req.params.id;
     const file = await (await dbClient.filesCollection())
       .findOne({ _id: ObjectId(id), userId: UserID });
     if (!file) {
@@ -99,7 +99,7 @@ export default class FilesController {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    const { id } = req.params;
+    const { id } = req.params.id;
     try {
       const file = await (await dbClient.filesCollection())
         .findOne({ _id: ObjectId(id), userId: UserID });
