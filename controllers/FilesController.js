@@ -22,6 +22,10 @@ export default class FilesController {
     }
     // console.log(req)
     const parentId = req.query.parentId ? req.query.parentId : 0;
+    if (parentId === 0) {
+      res.status(200).send([]);
+      return;
+    }
     // console.log(parentId)
     const page = Number(req.query.page) ? Number(req.query.page) : 0;
     // console.log("page:", page)
