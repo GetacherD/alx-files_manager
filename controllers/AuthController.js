@@ -13,10 +13,10 @@ export default class AuthController {
       return;
     }
     // console.log(auth.slice(0, 7))
-    if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
+    // if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
+    //   res.status(401).json({ error: 'Unauthorized' });
+    //   return;
+    // }
     const buff = Buffer.from(auth.slice(6), 'base64');
     const text = buff.toString('utf-8');
     const email = text.split(':')[0];
@@ -38,23 +38,23 @@ export default class AuthController {
       res.status(200).json({ token });
       return;
     } catch (e) {
-      res.status(500).json({ error: 'Server Error' });
+      res.status(500).json({ error: 'Server error' });
     }
   }
 
   static async getDisconnect(req, res) {
     const token = req.header('X-Token');
     try {
-      const key = await redisClient.get(`auth_${token}`);
-      if (!key) {
-        res.status(401).json({ error: 'Unauthorized' });
-        return;
-      }
+      // const key = await redisClient.get(`auth_${token}`);
+      // if (!key) {
+      //   res.status(401).json({ error: 'Unauthorized' });
+      //   return;
+      // }
       await redisClient.del(`auth_${token}`);
-      res.status(204).end();
+      res.status(204).send('');
       return;
     } catch (e) {
-      res.status(500).json({ error: 'Server Error' });
+      res.status(500).json({ error: 'Server error' });
     }
   }
 }
