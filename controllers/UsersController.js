@@ -16,20 +16,23 @@ export default class UsersController {
       res.status(400).json({ error: 'Missing password' });
       return;
     }
-    const user = await (await dbClient.usersCollection()).findOne({ email });
-    if (user) {
-      res.status(400).json({ error: 'Already exist' });
-      return;
+    try {
+      const user = await (await dbClient.usersCollection()).findOne({ email });
+      if (user) {
+        res.status(400).json({ error: 'Already exist' });
+        return;
+      }
+      const insertionInfo = await (await dbClient.usersCollection())
+        .insertOne({ email, password: sha1(password) });
+      const userId = insertionInfo.insertedId.toString();
+      if (userId) {
+        res.status(201).json({ email, id: userId });
+        // res.status(400).json({ error: 'Already exist' });
+        return;
+      }
+    } catch (e) {
+      res.status(500).json({ error: 'Server error' });
     }
-    const insertionInfo = await (await dbClient.usersCollection())
-      .insertOne({ email, password: sha1(password) });
-    const userId = insertionInfo.insertedId.toString();
-    if (userId) {
-      res.status(201).json({ email, id: userId });
-      // res.status(400).json({ error: 'Already exist' });
-      return;
-    }
-    res.status(401).json({ error: 'Unauthorized' });
   }
 
   static async getMe(req, res) {
@@ -46,7 +49,7 @@ export default class UsersController {
       res.status(200).json({ email: obj.email, id: obj._id.toString() });
       return;
     } catch (e) {
-      res.status(401).json({ error: 'Unauthorized' });
+      res.status(500).json({ error: 'Server error' });
     }
   }
 }
