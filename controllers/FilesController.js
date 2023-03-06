@@ -2,10 +2,67 @@ import fs, { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
+// import { promisify } from 'util';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 export default class FilesController {
+  static async getIndex(req, res) {
+    const token = req.header('X-Token');
+    let UserID = null;
+    try {
+      UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      if (!UserID) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+    } catch (e) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    // console.log(req)
+    const parentId = req.query.parentId ? req.query.parentId : 0;
+    // console.log(parentId)
+    const page = Number(req.query.page) ? Number(req.query.page) : 0;
+    // console.log("page:", page)
+    const files = await (await (await dbClient.filesCollection())
+      .find({ parentId }).skip(page * 20).limit(20)).toArray();
+    res.status(200).send(files);
+  }
+
+  static async getShow(req, res) {
+    const token = req.header('X-Token');
+    let UserID = null;
+    try {
+      UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      if (!UserID) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+    } catch (e) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    const { id } = req.params;
+    try {
+      const file = await (await dbClient.filesCollection()).findOne({ _id: ObjectId(id) });
+      if (!file) {
+        res.status(404).json({ error: 'Not found' });
+        return;
+      }
+      const isExist = existsSync(file.localPath);
+      if (!isExist) {
+        res.status(404).json({ error: 'Not found' });
+        return;
+      }
+      const data = await fs.promises.readFile(file.localPath, 'utf-8');
+      res.status(200).send(data);
+      return;
+    } catch (e) {
+      res.status(404).json({ error: 'Not found' });
+    }
+  }
+
   static async postUpload(req, res) {
     const token = req.header('X-Token');
     let UserID = null;
