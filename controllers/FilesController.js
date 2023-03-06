@@ -207,11 +207,11 @@ export default class FilesController {
       const fileNameLocal = uuid4();
       let clearData = null;
       if (type_ === 'image') {
-        clearData = data_;
+        clearData = Buffer.from(data_, 'base64');
       } else {
         clearData = Buffer.from(data_, 'base64').toString('utf-8');
       }
-      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
+      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData, { flag: 'w' });
       // file is placed in HDD
       // DB reference to the file
       const addedToDb = await (await dbClient.filesCollection()).insertOne({
