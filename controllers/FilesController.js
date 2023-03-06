@@ -214,7 +214,7 @@ export default class FilesController {
       return;
     }
     // parent_ID -> folder id for file    root /  default 0
-    if (parentId_) { // if parent ID !=0  some folder id
+    if (parentId_ !== 0) { // if parent ID !=0  some folder id
       const folderId = await (await dbClient.filesCollection()) // folder object
         .findOne({ _id: ObjectId(parentId_) });
 
