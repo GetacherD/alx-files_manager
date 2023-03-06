@@ -12,11 +12,11 @@ export default class AuthController {
       res.status(400).json({ error: 'No authorization header' });
       return;
     }
-    // console.log(auth.slice(0, 7))
-    // if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
-    //   res.status(401).json({ error: 'Unauthorized' });
-    //   return;
-    // }
+    console.log(auth.slice(0, 7));
+    if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
     const buff = Buffer.from(auth.slice(6), 'base64');
     const text = buff.toString('utf-8');
     const email = text.split(':')[0];
