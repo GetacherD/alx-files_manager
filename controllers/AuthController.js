@@ -8,20 +8,28 @@ export default class AuthController {
   static async getConnect(req, res) {
     //     console.log(req);
     const auth = req.header('Authorization');
+    if (!auth) {
+      res.status(400).json({ error: 'No authorization header' });
+      return;
+    }
     // console.log(auth.slice(0, 7))
     if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    const buff = Buffer.from(auth.slice(5, auth.length - 1), 'base64');
+    const buff = Buffer.from(auth.slice(6), 'base64');
     const text = buff.toString('utf-8');
     const email = text.split(':')[0];
     const password = text.split(':')[1];
     try {
       const user = await (await dbClient.usersCollection())
-        .findOne({ email, password: sha1(password) });
+        .findOne({ email });
       if (!user) {
         res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+      if (user.password !== sha1(password)) {
+        res.status(403).json({ error: 'Invalid credentials' });
         return;
       }
       const token = uuidv4();
