@@ -8,7 +8,8 @@ export default class AuthController {
   static async getConnect(req, res) {
     //     console.log(req);
     const auth = req.header('Authorization');
-    if (auth.slice(0, 5).toLowerCase() !== 'Basic'.toLowerCase()) {
+    console.log(auth.slice(0, 7))
+    if (auth.slice(0, 6).toLowerCase() !== 'Basic '.toLowerCase()) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
