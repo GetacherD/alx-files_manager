@@ -45,7 +45,8 @@ export default class FilesController {
     }
     const { id } = req.params;
     try {
-      const file = await (await dbClient.filesCollection()).findOne({ _id: ObjectId(id) });
+      const file = await (await dbClient.filesCollection())
+        .findOne({ _id: ObjectId(id), userId: UserID });
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
