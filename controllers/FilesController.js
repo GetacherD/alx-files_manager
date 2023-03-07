@@ -113,7 +113,7 @@ export default class FilesController {
         return;
       }
       const files = await (await (await dbClient.filesCollection())
-        .find({ parentId: ObjectId(parentId) })
+        .find({ parentId: ObjectId(parentId), userId: ObjectId(UserID) })
         .skip(page * 20).limit(20)).toArray(); // 60 60-80
       files.map((item) => {
         const file = item;
