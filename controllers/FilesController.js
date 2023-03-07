@@ -149,12 +149,17 @@ export default class FilesController {
   static async postUpload(req, res) {
     try {
       const token = req.headers['x-token'];
-
+      // console.log(token)
+      // res.send(token)
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      // res.send(UserID)
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
+
+      console.log('The user is', UserID);
+
       const name_ = (req.body && req.body.name) ? req.body.name : null;
       const type_ = (req.body && req.body.type) ? req.body.type : null;
       const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : '0';
@@ -191,11 +196,12 @@ export default class FilesController {
           return;
         }
       }
+
       // only if ther is user, parent id set and is folder of not set at all
       // ready to be saved in specified folder
       if (type_ === 'folder') {
         const NewFolder = {
-          type: 'folder', userId: UserID, name: name_, isPublic: isPublic_, parentId: parentId_,
+          type: 'folder', userId: UserID, name: name_, isPublic: isPublic_, parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
         };
         const insert = await (await dbClient.filesCollection())
           .insertOne(NewFolder);
@@ -215,6 +221,7 @@ export default class FilesController {
       if (!folderExists) {
         await fs.promises.mkdir(uploadFolder);
       }
+
       // either already exist or success created
       const fileNameLocal = uuid4();
       const clearData = Buffer.from(data_, 'base64').toString('utf-8');
@@ -227,15 +234,15 @@ export default class FilesController {
       await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData, { flag: 'w' });
       // file is placed in HDD
       // DB reference to the file
+
       const addedToDb = await (await dbClient.filesCollection()).insertOne({
         userId: UserID,
         name: name_,
         type: type_,
         isPublic: isPublic_,
-        parentId: parentId_,
+        parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
         localPath: `${uploadFolder}/${fileNameLocal}`,
       });
-
       res.status(201).json({
         id: addedToDb.insertedId,
         userId: UserID,
@@ -246,6 +253,7 @@ export default class FilesController {
         localPath: `${uploadFolder}/${fileNameLocal}`,
       });
     } catch (e) {
+      console.log('all the way here');
       res.status(500).json({ error: 'Server Error' });
     }
   }

@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('', require('./routes/index'));
+
 // if (!redisClient.isAlive() && !dbClient.isAlive()) {
 //   console.log("Connecting to server mongodb and redis")
 // }
