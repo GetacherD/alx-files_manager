@@ -88,7 +88,7 @@ export default class FilesController {
         return;
       }
       await (await dbClient.filesCollection())
-        .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: true } });
+        .updateOne({ _id: ObjectId(id), userId: ObjectId(UserID) }, { $set: { isPublic: true } });
       // const data = await fs.promises.readFile(file.localPath, 'utf-8');
       file.isPublic = true;
       res.status(200).send(file);
@@ -133,7 +133,7 @@ export default class FilesController {
       }
       const { id } = req.params;
       const file = await (await dbClient.filesCollection())
-        .findOne({ _id: ObjectId(id), userId: ObjectId(UserID) });
+        .findOne({ _id: ObjectId(id) }); // , userId: ObjectId(UserID)
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
