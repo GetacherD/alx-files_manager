@@ -17,14 +17,14 @@ export default class FilesController {
         res.status(404).json({ error: 'Not found' });
         return;
       }
-      if (file.isPublic) {
+      if (file.isPublic && file.type !== 'folder') {
         res.sendFile(file.localPath);
         return;
       }
       const token = req.headers['x-token'];
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
-        res.status(401).json({ error: 'Unauthorized' });
+        res.status(404).json({ error: 'Not found' });
         return;
       }
       console.log('UserId, file.userId', UserID, file.userId);
