@@ -114,6 +114,8 @@ export default class FilesController {
       const files = await (await (await dbClient.filesCollection())
         .find({ parentId: ObjectId(parentId) }).skip(page * 20).limit(20)).toArray(); // 60 60-80
       console.log(files);
+      files.id = files._id;
+      delete files._id;
       res.status(200).send(files);
       return;
     } catch (e) {
