@@ -21,13 +21,14 @@ export default class FilesController {
         res.sendFile(file.localPath);
         return;
       }
-      const token = req.header('X-Token');
+      const token = req.headers['x-token'];
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
-      if (!file.isPublic && UserID !== file.userId) {
+      console.log('UserId, file.userId', UserID, file.userId);
+      if (UserID !== file.userId) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
@@ -42,7 +43,7 @@ export default class FilesController {
       res.sendFile(file.localPath);
       return;
     } catch (e) {
-      res.status(500).send('');
+      res.status(500).send();
     }
   }
 
