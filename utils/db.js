@@ -8,20 +8,22 @@ class DBClient {
     const dbURL = `mongodb://${host}:${port}/${database}`;
     this.client = new MongoClient(dbURL, { useUnifiedTopology: true });
     this.live = false;
-    this.client.connect((err) => {
-      if (err) {
-        this.live = false;
-        // console.log("Connection to Mongo DB failed");
-      } else {
-        this.live = true;
-        // console.log("Mongo DB Connected Successfully!")
-      }
-    });
+    this.client.connect();
     // console.log(this.client.db(), "the database")
+
+    // (err) => {
+    //   if (err) {
+    //     this.live = false;
+    //     // console.log("Connection to Mongo DB failed");
+    //   } else {
+    //     this.live = true;
+    //     // console.log("Mongo DB Connected Successfully!")
+    //   }
+    // }
   }
 
   isAlive() {
-    return this.live;
+    return this.client.isConnected();
   }
 
   async nbUsers() {
