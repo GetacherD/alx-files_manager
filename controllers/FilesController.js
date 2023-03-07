@@ -113,7 +113,8 @@ export default class FilesController {
         return;
       }
       const files = await (await (await dbClient.filesCollection())
-        .find({ parentId: ObjectId(parentId) }).skip(page * 20).limit(20)).toArray(); // 60 60-80
+        .find({ parentId: ObjectId(parentId), userId: ObjectId(UserID) })
+        .skip(page * 20).limit(20)).toArray(); // 60 60-80
       files.id = files._id;
       delete files._id;
       res.status(200).send(files);
@@ -131,13 +132,17 @@ export default class FilesController {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
+      console.log(UserID);
       const { id } = req.params;
+      console.log(id);
       const file = await (await dbClient.filesCollection())
-        .findOne({ _id: ObjectId(id) }); // , userId: ObjectId(UserID)
+        .findOne({ _id: ObjectId(id), userId: ObjectId(UserID) }); // ,
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
+      file.id = file._id;
+      delete file._id;
       res.status(200).json(file);
       return;
       // const isExist = existsSync(file.localPath);
