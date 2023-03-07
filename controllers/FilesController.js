@@ -162,7 +162,7 @@ export default class FilesController {
 
       const name_ = (req.body && req.body.name) ? req.body.name : null;
       const type_ = (req.body && req.body.type) ? req.body.type : null;
-      const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : '0';
+      const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : 0;
       const isPublic_ = (req.body && req.body.isPublic) ? req.body.isPublic : false;
       let data_ = null; // Base64 file format
       if (type_ === 'file' || type_ === 'image') {
@@ -182,7 +182,7 @@ export default class FilesController {
         return;
       }
 
-      if (parentId_ !== '0') { // if parent ID !=0  some folder id
+      if (parentId_ !== 0) { // if parent ID !=0  some folder id
         const fileObj = await (await dbClient.filesCollection()) // folder object
           .findOne({ _id: ObjectId(parentId_) });
         console.log('the FileObj is', fileObj);
