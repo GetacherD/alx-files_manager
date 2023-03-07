@@ -7,7 +7,7 @@ class RedisClient {
     this.live = true;
 
     this.client.on('error', () => {
-      console.error('Error fail');
+      console.error('redis server is offline');
       this.live = false;
     });
     this.client.on('connect', () => {
