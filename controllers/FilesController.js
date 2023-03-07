@@ -3,25 +3,28 @@ import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
 // import { promisify } from 'util';
-import { promisify } from 'util';
-import { lookup } from 'mime-types';
+
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
 
 export default class FilesController {
   static async getFile(req, res) {
     try {
-      const token = req.header('X-Token');
-      const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
-      if (!UserID) {
-        res.status(401).json({ error: 'Unauthorized' });
-        return;
-      }
       const { id } = req.params;
       const file = await (await dbClient.filesCollection())
         .findOne({ _id: ObjectId(id) });
       if (!file) {
         res.status(404).json({ error: 'Not found' });
+        return;
+      }
+      if (file.isPublic) {
+        res.sendFile(file.localPath);
+        return;
+      }
+      const token = req.header('X-Token');
+      const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
+      if (!UserID) {
+        res.status(401).json({ error: 'Unauthorized' });
         return;
       }
       if (!file.isPublic && UserID !== file.userId) {
@@ -36,7 +39,7 @@ export default class FilesController {
         res.status(404).json({ error: 'Not found' });
         return;
       }
-      await promisify(res.sendFile)(file.localPath, { headers: { 'Content-Type': lookup(file.name) } });
+      res.sendFile(file.localPath);
       return;
     } catch (e) {
       res.status(500).send('');
