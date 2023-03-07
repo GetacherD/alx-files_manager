@@ -217,7 +217,7 @@ export default class FilesController {
       }
       // either already exist or success created
       const fileNameLocal = uuid4();
-      const clearData = Buffer.from(data_, 'base64');// .toString('utf-8');
+      const clearData = Buffer.from(data_, 'base64').toString('utf-8');
       // if (type_ === 'image') {
       //   clearData = Buffer.from(data_, 'base64');
       // } else {
