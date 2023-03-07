@@ -106,14 +106,14 @@ export default class FilesController {
         return;
       }
       const parentId = req.query.parentId ? req.query.parentId : 0;
-      const page = req.query.page ? req.query.page : 0;
+      const page1 = req.query.page ? req.query.page : 0;
+      const page = parseInt(page1, 10);
       if (parentId === 0 || parentId === '0') {
         res.status(200).json([]);
         return;
       }
       const files = await (await (await dbClient.filesCollection())
         .find({ parentId: ObjectId(parentId) }).skip(page * 20).limit(20)).toArray(); // 60 60-80
-      console.log(files);
       files.id = files._id;
       delete files._id;
       res.status(200).send(files);
@@ -126,24 +126,20 @@ export default class FilesController {
   static async getShow(req, res) {
     try {
       const token = req.headers['x-token'];
-      console.log(token);
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
-      console.log(UserID);
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
       const { id } = req.params;
-      console.log(id);
       const file = await (await dbClient.filesCollection())
         .findOne({ _id: ObjectId(id), userId: ObjectId(UserID) });
-      console.log('File found', file);
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
-      console.log(file);
       res.status(200).json(file);
+      return;
       // const isExist = existsSync(file.localPath);
       // if (!isExist) {
       //   res.status(404).json({ error: 'Not found' });
@@ -153,7 +149,7 @@ export default class FilesController {
       // res.status(200).send(file);
       // return;
     } catch (e) {
-      res.status(500).json({ error: 'Server error' });
+      res.status(404).json({ error: 'Not found' });
     }
   }
 
