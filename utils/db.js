@@ -9,21 +9,19 @@ class DBClient {
     this.client = new MongoClient(dbURL, { useUnifiedTopology: true });
     this.live = false;
     this.client.connect();
-    // console.log(this.client.db(), "the database")
-
-    // (err) => {
-    //   if (err) {
-    //     this.live = false;
-    //     // console.log("Connection to Mongo DB failed");
-    //   } else {
-    //     this.live = true;
-    //     // console.log("Mongo DB Connected Successfully!")
-    //   }
-    // }
+    this.client.connect((err) => {
+      if (err) {
+        this.live = false;
+        console.log('Connection failed!');
+      } else {
+        this.live = true;
+        console.log('Connection successfull');
+      }
+    });
   }
 
   isAlive() {
-    return this.client.isConnected();
+    return this.live;
   }
 
   async nbUsers() {
