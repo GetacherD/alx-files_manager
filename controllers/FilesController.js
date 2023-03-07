@@ -48,25 +48,26 @@ export default class FilesController {
 
   static async putUnpublish(req, res) {
     try {
-      const token = req.header('X-Token');
+      const token = req.headers['x-token'];
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
       const { id } = req.params;
-      console.log('the id', id);
       const file = await (await dbClient.filesCollection())
-        .findOne({ _id: ObjectId(id), userId: UserID });
+        .findOne({ _id: ObjectId(id), userId: ObjectId(UserID) });
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
       await (await dbClient.filesCollection())
-        .updateOne({ _id: ObjectId(id), userId: UserID }, { $set: { isPublic: false } });
+        .updateOne({ _id: ObjectId(id), userId: ObjectId(UserID) }, { $set: { isPublic: false } });
       // const data = await fs.promises.readFile(file.localPath, 'utf-8');
       file.isPublic = false;
-      res.status(200).send(file);
+      file.id = file._id;
+      delete file._id;
+      res.status(200).json(file);
     } catch (e) {
       res.status(500).json({ error: 'Server error' });
     }
@@ -74,7 +75,7 @@ export default class FilesController {
 
   static async putPublish(req, res) {
     try {
-      const token = req.header('X-Token');
+      const token = req.headers['x-token'];
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
@@ -82,7 +83,7 @@ export default class FilesController {
       }
       const { id } = req.params;
       const file = await (await dbClient.filesCollection())
-        .findOne({ _id: ObjectId(id), userId: UserID });
+        .findOne({ _id: ObjectId(id), userId: ObjectId(UserID) });
       if (!file) {
         res.status(404).json({ error: 'Not found' });
         return;
@@ -91,7 +92,9 @@ export default class FilesController {
         .updateOne({ _id: ObjectId(id), userId: ObjectId(UserID) }, { $set: { isPublic: true } });
       // const data = await fs.promises.readFile(file.localPath, 'utf-8');
       file.isPublic = true;
-      res.status(200).send(file);
+      file.id = file._id;
+      delete file._id;
+      res.status(200).json(file);
     } catch (e) {
       res.status(500).json({ error: 'Server error' });
     }
@@ -122,7 +125,7 @@ export default class FilesController {
         return file;
       });
       // console.log(files)
-      res.status(200).send(files);
+      res.status(200).json(files);
       return;
     } catch (e) {
       res.status(500).json({ error: 'Server error' });
