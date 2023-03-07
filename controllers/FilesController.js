@@ -148,21 +148,20 @@ export default class FilesController {
 
   static async postUpload(req, res) {
     try {
-      const token = req.header('X-Token');
+      const token = req.headers['x-token'];
 
       const UserID = await redisClient.get(`auth_${token}`); // _id -> of user
       if (!UserID) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
       }
-
       const name_ = (req.body && req.body.name) ? req.body.name : null;
       const type_ = (req.body && req.body.type) ? req.body.type : null;
-      const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : 0;
+      const parentId_ = (req.body && req.body.parentId) ? req.body.parentId : '0';
       const isPublic_ = (req.body && req.body.isPublic) ? req.body.isPublic : false;
       let data_ = null; // Base64 file format
       if (type_ === 'file' || type_ === 'image') {
-        data_ = req.body ? req.body.data : null;
+        data_ = (req.body && req.body.data) ? req.body.data : null;
       }
       if (!name_) {
         res.status(400).json({ error: 'Missing name' });
@@ -177,87 +176,75 @@ export default class FilesController {
         res.status(400).json({ error: 'Missing data' });
         return;
       }
-      // parent_ID -> folder id for file    root /  default 0
-      if (parentId_ !== 0) { // if parent ID !=0  some folder id
-        const folderId = await (await dbClient.filesCollection()) // folder object
-          .findOne({ _id: ObjectId(parentId_) });
 
-        if (!folderId) {
+      if (parentId_ !== '0') { // if parent ID !=0  some folder id
+        const fileObj = await (await dbClient.filesCollection()) // folder object
+          .findOne({ _id: ObjectId(parentId_) });
+        console.log('the FileObj is', fileObj);
+        if (!fileObj) {
           res.status(400).json({ error: 'Parent not found' });
           return;
         }
-        if (folderId.type !== 'folder') {
+        // file image folder
+        if (fileObj.type !== 'folder') {
           res.status(400).json({ error: 'Parent is not a folder' });
           return;
         }
       }
+      // only if ther is user, parent id set and is folder of not set at all
       // ready to be saved in specified folder
       if (type_ === 'folder') {
-        try {
-          const NewFolder = {
-            type: 'folder', userId: UserID, name: name_, isPublic: isPublic_, parentId: parentId_ || 0,
-          };
-          const insert = await (await dbClient.filesCollection())
-            .insertOne(NewFolder);
-          res.status(201).send({
-            id: insert.insertedId,
-            name: name_,
-            type: type_,
-            userId: UserID,
-            parentId: parentId_ || 0,
-            isPublic: isPublic_,
-          });
-          return;
-        } catch (e) {
-          res.status(500).json({ error: 'Server Error' });
-          return;
-        }
+        const NewFolder = {
+          type: 'folder', userId: UserID, name: name_, isPublic: isPublic_, parentId: parentId_,
+        };
+        const insert = await (await dbClient.filesCollection())
+          .insertOne(NewFolder);
+        res.status(201).send({
+          id: insert.insertedId,
+          name: name_,
+          type: type_,
+          userId: UserID,
+          parentId: parentId_,
+          isPublic: isPublic_,
+        });
+        return;
       }
       // only if type is not folder
       const uploadFolder = process.env.FOLDER_PATH || '/tmp/files_manager';
       const folderExists = existsSync(uploadFolder);
       if (!folderExists) {
-        const createdDir = await fs.promises.mkdir(uploadFolder);
-        if (!createdDir) {
-          res.status(500).json({ error: 'Server Error' });
-          return;
-        }
+        await fs.promises.mkdir(uploadFolder);
       }
+      // either already exist or success created
+      const fileNameLocal = uuid4();
+      const clearData = Buffer.from(data_, 'base64');// .toString('utf-8');
+      // if (type_ === 'image') {
+      //   clearData = Buffer.from(data_, 'base64');
+      // } else {
+      //   clearData = Buffer.from(data_, 'base64').toString('utf-8');
+      // }
+      // write to hard disk
+      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData, { flag: 'w' });
+      // file is placed in HDD
+      // DB reference to the file
+      const addedToDb = await (await dbClient.filesCollection()).insertOne({
+        userId: UserID,
+        name: name_,
+        type: type_,
+        isPublic: isPublic_,
+        parentId: parentId_,
+        localPath: `${uploadFolder}/${fileNameLocal}`,
+      });
 
-      try {
-        // either already exist or success created
-        const fileNameLocal = uuid4();
-        let clearData = null;
-        if (type_ === 'image') {
-          clearData = Buffer.from(data_, 'base64');
-        } else {
-          clearData = Buffer.from(data_, 'base64').toString('utf-8');
-        }
-        await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData, { flag: 'w' });
-        // file is placed in HDD
-        // DB reference to the file
-        const addedToDb = await (await dbClient.filesCollection()).insertOne({
-          userId: UserID,
-          name: name_,
-          type: type_,
-          isPublic: isPublic_,
-          parentId: parentId_,
-          localPath: `${uploadFolder}/${fileNameLocal}`,
-        });
-
-        res.status(201).json({
-          id: addedToDb.insertedId,
-          userId: UserID,
-          name: name_,
-          type: type_,
-          isPublic: isPublic_,
-          parentId: parentId_,
-          localPath: `${uploadFolder}/${fileNameLocal}`,
-        });
-      } catch (e) {
-        res.status(500).json({ error: 'Server Error' });
-        return;
-      }
+      res.status(201).json({
+        id: addedToDb.insertedId,
+        userId: UserID,
+        name: name_,
+        type: type_,
+        isPublic: isPublic_,
+        parentId: parentId_,
+        localPath: `${uploadFolder}/${fileNameLocal}`,
+      });
     } catch (e) {
       res.status(500).json({ error: 'Server Error' });
     }
