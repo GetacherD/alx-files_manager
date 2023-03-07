@@ -49,9 +49,16 @@ export default class AuthController {
       //   res.status(401).json({ error: 'Unauthorized' });
       //   return;
       // }
-      const token = req.header('X-Token');
+      const token = req.headers['x-token'];
+      console.log(token);
+      const userId = await redisClient.get(`auth_${token}`);
+      console.log(userId);
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
       await redisClient.del(`auth_${token}`);
-      res.status(204).send('');
+      res.status(204).send();
       return;
     } catch (e) {
       res.status(500).json({ error: 'Server error' });
