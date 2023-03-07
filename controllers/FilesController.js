@@ -201,7 +201,7 @@ export default class FilesController {
       // ready to be saved in specified folder
       if (type_ === 'folder') {
         const NewFolder = {
-          type: 'folder', userId: UserID, name: name_, isPublic: isPublic_, parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
+          type: 'folder', userId: ObjectId(UserID), name: name_, isPublic: isPublic_, parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
         };
         const insert = await (await dbClient.filesCollection())
           .insertOne(NewFolder);
@@ -236,7 +236,7 @@ export default class FilesController {
       // DB reference to the file
 
       const addedToDb = await (await dbClient.filesCollection()).insertOne({
-        userId: UserID,
+        userId: ObjectId(UserID),
         name: name_,
         type: type_,
         isPublic: isPublic_,
