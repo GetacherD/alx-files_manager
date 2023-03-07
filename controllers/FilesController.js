@@ -113,10 +113,15 @@ export default class FilesController {
         return;
       }
       const files = await (await (await dbClient.filesCollection())
-        .find({ parentId: ObjectId(parentId), userId: ObjectId(UserID) })
+        .find({ parentId: ObjectId(parentId) })
         .skip(page * 20).limit(20)).toArray(); // 60 60-80
-      files.id = files._id;
-      delete files._id;
+      files.map((item) => {
+        const file = item;
+        file.id = file._id;
+        delete file._id;
+        return file;
+      });
+      // console.log(files)
       res.status(200).send(files);
       return;
     } catch (e) {
