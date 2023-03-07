@@ -224,14 +224,14 @@ export default class FilesController {
 
       // either already exist or success created
       const fileNameLocal = uuid4();
-      const clearData = Buffer.from(data_, 'base64').toString('utf-8');
-      // if (type_ === 'image') {
-      //   clearData = Buffer.from(data_, 'base64');
-      // } else {
-      //   clearData = Buffer.from(data_, 'base64').toString('utf-8');
-      // }
+      let clearData = null;
+      if (type_ === 'image') {
+        clearData = Buffer.from(data_, 'base64');
+      } else {
+        clearData = Buffer.from(data_, 'base64').toString('utf-8');
+      }
       // write to hard disk
-      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData, { flag: 'w' });
+      await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
       // file is placed in HDD
       // DB reference to the file
 
@@ -253,7 +253,6 @@ export default class FilesController {
         localPath: `${uploadFolder}/${fileNameLocal}`,
       });
     } catch (e) {
-      console.log('all the way here');
       res.status(500).json({ error: 'Server Error' });
     }
   }
