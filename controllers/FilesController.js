@@ -209,7 +209,7 @@ export default class FilesController {
           id: insert.insertedId,
           name: name_,
           type: type_,
-          userId: UserID,
+          userId: UserID.toString(),
           parentId: parentId_,
           isPublic: isPublic_,
         });
@@ -219,17 +219,17 @@ export default class FilesController {
       const uploadFolder = process.env.FOLDER_PATH || '/tmp/files_manager';
       const folderExists = existsSync(uploadFolder);
       if (!folderExists) {
-        await fs.promises.mkdir(uploadFolder);
+        await fs.promises.mkdir(uploadFolder, { recursive: true });
       }
 
       // either already exist or success created
       const fileNameLocal = uuid4();
-      let clearData = null;
-      if (type_ === 'image') {
-        clearData = Buffer.from(data_, 'base64');
-      } else {
-        clearData = Buffer.from(data_, 'base64').toString('utf-8');
-      }
+      const clearData = Buffer.from(data_, 'base64');
+      // if (type_ === 'image') {
+      //   clearData = Buffer.from(data_, 'base64');
+      // } else {
+      //   clearData = Buffer.from(data_, 'base64').toString('utf-8');
+      // }
       // write to hard disk
       await fs.promises.writeFile(path.join(uploadFolder, fileNameLocal), clearData);
       // file is placed in HDD
@@ -245,7 +245,7 @@ export default class FilesController {
       });
       res.status(201).json({
         id: addedToDb.insertedId,
-        userId: UserID,
+        userId: UserID.toString(),
         name: name_,
         type: type_,
         isPublic: isPublic_,
