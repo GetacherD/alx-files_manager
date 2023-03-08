@@ -2,6 +2,8 @@ import fs, { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
+// import Queue from 'bull/lib/queue';
+import fileQueue from '../worker'
 // import { promisify } from 'util';
 
 import redisClient from '../utils/redis';
@@ -264,6 +266,10 @@ export default class FilesController {
         parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
         localPath: `${uploadFolder}/${fileNameLocal}`,
       });
+
+      // const fileQueue = new Queue('first queue');
+      fileQueue.add({userId:UserID, fileId:addedToDb.insertedId});
+
       res.status(201).json({
         id: addedToDb.insertedId,
         userId: UserID.toString(),
