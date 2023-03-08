@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('', require('./routes/index'));
+
 // if (!redisClient.isAlive() && !dbClient.isAlive()) {
 //   console.log("Connecting to server mongodb and redis")
 // }
@@ -27,16 +28,17 @@ app.use('', require('./routes/index'));
 // }
 
 // function connectDb() {
-//   console.log('Try Connection');
+//   // console.log('Try Connection');
 //   if (dbClient.isAlive() && redisClient.isAlive()) {
-//     console.log('Connected to mongo');
+//     // console.log('Connected to mongo');
 //     app.listen(port, () => {
 //       console.log(`Server running on port ${port}`);
 //     });
 //   } else {
-//     setTimeout(() => connectDb(), 1000);
+//     setTimeout(() => connectDb(), 5000);
 //   }
 // }
+
 // connectDb();
 
 app.listen(port, () => {
