@@ -2,8 +2,6 @@ import fs, { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
-// import Queue from 'bull/lib/queue';
-import fileQueue from '../worker'
 // import { promisify } from 'util';
 
 import redisClient from '../utils/redis';
@@ -38,11 +36,11 @@ export default class FilesController {
         res.status(400).json({ error: 'A folder doesn\'t have content' });
         return;
       }
-      if (!existsSync(file.localPath)) {
+      if (!existsSync(`${file.localPath}${req.query.size ? `_${req.query.size}` : ''}`)) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
-      res.sendFile(file.localPath);
+      res.sendFile(`${file.localPath}${req.query.size ? `_${req.query.size}` : ''}`);
       return;
     } catch (e) {
       res.status(500).send();
@@ -266,10 +264,6 @@ export default class FilesController {
         parentId: parentId_ !== '0' ? ObjectId(parentId_) : '0',
         localPath: `${uploadFolder}/${fileNameLocal}`,
       });
-
-      // const fileQueue = new Queue('first queue');
-      fileQueue.add({userId:UserID, fileId:addedToDb.insertedId});
-
       res.status(201).json({
         id: addedToDb.insertedId,
         userId: UserID.toString(),
