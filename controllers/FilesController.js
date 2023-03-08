@@ -2,7 +2,10 @@ import fs, { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
+<<<<<<< HEAD
 import Queue from 'bull/lib/queue';
+=======
+>>>>>>> 541648b2b84dddf3c1c7325f5b1481de23a95a6a
 // import { promisify } from 'util';
 
 import redisClient from '../utils/redis';
@@ -37,11 +40,11 @@ export default class FilesController {
         res.status(400).json({ error: 'A folder doesn\'t have content' });
         return;
       }
-      if (!existsSync(file.localPath)) {
+      if (!existsSync(`${file.localPath}${req.query.size ? `_${req.query.size}` : ''}`)) {
         res.status(404).json({ error: 'Not found' });
         return;
       }
-      res.sendFile(file.localPath);
+      res.sendFile(`${file.localPath}${req.query.size ? `_${req.query.size}` : ''}`);
       return;
     } catch (e) {
       res.status(500).send();
