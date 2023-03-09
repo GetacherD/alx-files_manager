@@ -275,7 +275,7 @@ export default class FilesController {
         type: type_,
         isPublic: isPublic_,
         parentId: parentId_,
-        localPath: `${uploadFolder}/${fileNameLocal}`,
+        // localPath: `${uploadFolder}/${fileNameLocal}`,
       });
     } catch (e) {
       res.status(500).json({ error: 'Server Error' });
