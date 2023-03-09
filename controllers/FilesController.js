@@ -2,11 +2,7 @@ import fs, { existsSync } from 'fs';
 import path from 'path';
 import { v4 as uuid4 } from 'uuid';
 import { ObjectId } from 'mongodb';
-<<<<<<< HEAD
 import Queue from 'bull/lib/queue';
-=======
->>>>>>> 541648b2b84dddf3c1c7325f5b1481de23a95a6a
-// import { promisify } from 'util';
 
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
